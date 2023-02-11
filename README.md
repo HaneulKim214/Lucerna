@@ -1,3 +1,3 @@
 # Stocks
-
-For analysis and forecast of stocks in Python.
+- Stock analysis
+- applying various Math, Statistic, ML concepts to investing.
