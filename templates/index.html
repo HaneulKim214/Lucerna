@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Robo Advisor</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Plotly.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.18.2/plotly.min.js"></script>
+
+    <!-- SortableJS for drag-and-drop -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-chart-line me-2"></i>
+                Lucerna
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if active_tab != 'portfolio' else '' }}" href="/">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if active_tab == 'portfolio' else '' }}" href="/portfolio">Portfolio</a>
+                    </li>
+                </ul>
+                <div class="ms-auto">
+                    <div class="input-group">
+                        <input type="text" id="stockSearch" class="form-control" placeholder="Search stocks...">
+                        <button class="btn btn-light" type="button" id="searchButton">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div id="searchResults" class="d-none mb-3">
+            <h5>Search Results</h5>
+            <div class="list-group" id="searchResultsList"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <span id="stockSymbol">Select a stock</span>
+                            <small id="stockName" class="text-muted"></small>
+                        </h5>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-secondary" id="addToPortfolio">
+                                <i class="fas fa-plus"></i> Add to Portfolio
+                            </button>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                    Time Period
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item period-option" data-period="1mo" href="#">1 Month</a></li>
+                                    <li><a class="dropdown-item period-option" data-period="3mo" href="#">3 Months</a></li>
+                                    <li><a class="dropdown-item period-option" data-period="6mo" href="#">6 Months</a></li>
+                                    <li><a class="dropdown-item period-option" data-period="1y" href="#">1 Year</a></li>
+                                    <li><a class="dropdown-item period-option" data-period="5y" href="#">5 Years</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="candlestickChart" style="height: 400px;">
+                            <div class="text-center py-5 my-5 text-muted">
+                                <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                <h4>Select a stock to view chart</h4>
+                                <p>Search for a stock symbol above or select from your portfolio</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Stock Info</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="stockInfo">
+                            <div class="text-center py-3 text-muted">
+                                <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                <p>Select a stock to view information</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Portfolio</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul id="portfolioList" class="list-group list-group-flush">
+                            <li class="list-group-item text-center text-muted py-3" id="emptyPortfolio">
+                                <i class="fas fa-folder-open mb-2"></i>
+                                <p class="mb-0">Your portfolio is empty</p>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-footer text-center d-none" id="portfolioActions">
+                        <button class="btn btn-sm btn-outline-primary" id="analyzePortfolio">
+                            <i class="fas fa-chart-pie me-1"></i> Analyze Portfolio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4 d-none" id="portfolioAnalysis">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">Portfolio Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div id="portfolioComparisonChart" style="height: 300px;"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Performance Metrics</h6>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label small text-muted">Return</label>
+                                                    <div class="h4" id="portfolioReturn">-</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label small text-muted">Volatility</label>
+                                                    <div class="h4" id="portfolioVolatility">-</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small text-muted">Period</label>
+                                            <div class="form-control-plaintext" id="portfolioPeriod">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="position-fixed top-0 start-0 w-100 h-100 d-none">
+        <div class="d-flex justify-content-center align-items-center h-100 bg-white bg-opacity-75">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/portfolio.js') }}"></script>
+</body>
+</html>
