@@ -32,3 +32,14 @@ Now using above analysis go through the steps below and provide investment advic
 3. What are some indirect factors that might affect company's stock price?
 4. Who are {company_name}'s competitors?
 """
+
+prompt_service_info = """
+As an investor, research on {company} must be done thoroughly before making an investment decision.
+I would like to understand every aspect of the company. To perform thorough and professional
+research you will follow below steps:
+1. Gather information about all the services and products of {company} and provide statistics. Utilize charts and tables for readability.
+2. Make sure all information are up to date.
+3. Specify most date of most recent data sources you've gathered information from.
+
+No need to add question numbers in the answer. 
+"""

@@ -32,3 +32,4 @@ Now using above analysis go through the steps below and provide investment advic
 3. What are some indirect factors that might affect company's stock price?
 4. Who are {company_name}'s competitors?
 """
+

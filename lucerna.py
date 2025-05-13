@@ -6,28 +6,27 @@ import yfinance as yf
 
 from datetime import timedelta, datetime
 from util import validate_dates
-
-print("Welcome, I am Lucerna, your customized investment advisor!")
-company_ticker = input("What company would you like to know about. Provide ticker symbol:")
-start_date = input("Start date (yyyy-mm-dd): ")
-end_date = input("End date (yyyy-mm-dd): ")
-
-# check validity of inputs
-validate_dates(start_date, end_date)
-print(f"Analysis beginning for {company_ticker} from {start_date} ~ {end_date}")
+from config import configure_llm
+from prompts import prompt_templates as pt
 
 
+class Lucerna:
+    def __init__(self, llm='gemini', version="gemini-2.0-flash"):
+        """
 
-# i) Generate plot, tables for stock prices and fundamental analysis
-stock_price_df = yf.download([company_ticker]
-                             ,start=start_date
-                             ,end=end_date
-                             ,interval='1d'
-                             ,threads=True)
-ticker = yf.Ticker(company_ticker)
-business_summary = ticker.info['longBusinessSummary']
-currency = ticker.info['currency']
-stock_exch = ticker.info['exchange']
+        :param llm:
+        :param version:
+        """
+        self.llm_model = configure_llm(llm, version)
 
+    def explain_service(self, company, custom_prompt=None):
+        """
 
-
+        :return:
+        llm response: txt
+        """
+        if custom_prompt:
+            prompt = custom_prompt
+        else:
+            prompt = pt.prompt_service_info.format(company=company)
+        return self.llm_model.generate_content(prompt)
