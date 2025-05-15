@@ -30,3 +30,4 @@ class Lucerna:
         else:
             prompt = pt.prompt_service_info.format(company=company)
         return self.llm_model.generate_content(prompt)
+
