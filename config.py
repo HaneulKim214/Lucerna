@@ -22,14 +22,3 @@ class Config:
     # Add other configuration settings as needed
     CACHE_TYPE = "SimpleCache"  # Flask-Caching settings
     CACHE_DEFAULT_TIMEOUT = 300
-
-
-def configure_llm(llm='gemini', version="gemini-2.0-flash"):
-    if llm == 'gemini':
-        import google.generativeai as genai
-        genai.configure(api_key=os.getenv('gemini_api_key'))
-        llm_model = genai.GenerativeModel(version)
-    else:
-        raise NameError(f"{llm}:{version} is not supported. Please try a differnt config.")
-    print('llm model successfully configured with: ', llm_model.model_name.split("/")[-1])
-    return llm_model
