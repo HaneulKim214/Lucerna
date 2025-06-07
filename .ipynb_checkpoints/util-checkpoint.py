@@ -2,6 +2,33 @@ from datetime import datetime, date, timedelta
 
 import pandas as pd
 
+
+def df_to_DFloader(df, date_col='date'):
+    """
+    Convert dataframe into python code where a dictionary is loaded as a Pandas df for
+    LLM input.
+
+    example:
+    df -> "pd.DataFrame({name:['helen', james], 'age':[33,23]})"
+
+    parameters
+    ----------
+    df: pd.DataFrame
+
+    return
+    ------
+    dfloader: str, text version of python code for creating dataframe
+    """
+
+    if isinstance(df.index, pd.DatetimeIndex):
+        df = (df.reset_index()
+               .astype({"index":str}) # convert datetime column to string
+               .rename(columns={"index":date_col})
+             )
+
+    dfloader = f"pd.DataFrame({df.to_dict(orient='list')})"
+    return dfloader
+
 def validate_dates(st_date, end_date):
     """
     Check

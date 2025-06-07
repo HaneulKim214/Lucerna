@@ -40,7 +40,7 @@ class LLMProvider(ABC):
     #     pass
 
 class GeminiProvider(LLMProvider):
-    """Gemini LLM provider implementation."""
+    """Gemini model list: https://ai.google.dev/gemini-api/docs/models"""
 
     def __init__(self, model_version: str = "gemini-2.0-flash"):
         """Initialize the Gemini provider.
@@ -53,8 +53,9 @@ class GeminiProvider(LLMProvider):
         self.model = genai.GenerativeModel(model_version)
         self.model_version = model_version
 
-    def generate_content(self, prompt: str, **kwargs) -> str:
-        response = self.model.generate_content(prompt, **kwargs)
+    def generate_content(self, prompt: str, generation_config, **kwargs) -> str:
+        response = self.model.generate_content(prompt, generation_config=generation_config,
+                                               **kwargs)
         return response.text
 
     def get_model_list():
@@ -77,7 +78,7 @@ class OpenAIProvider(LLMProvider):
         self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
         self.model_version = model_version
 
-    def generate_content(self, prompt: str, **kwargs) -> str:
+    def generate_content(self, prompt: str, generation_config, **kwargs) -> str:
         # Extract OpenAI specific parameters or use defaults
         # temperature = kwargs.get('temperature', 0.7)
         # max_tokens = kwargs.get('max_tokens', 1000)
@@ -123,14 +124,16 @@ class Lucerna:
         if not model_version:
             model_version = 'default'
         self.llm = LLMFactory.create_provider(provider, model_version)
+        
         print(f"LLM successfully configured with: {provider.upper()}: {model_version}")
 
-    def explain_company(self, company: str, custom_prompt: Optional[str] = None) -> str:
+    def explain_company(self, company, custom_prompt=None, generation_config={}) -> str:
         """Explain services for a given company.
 
         Args:
             company: The company name to explain services for
             custom_prompt: Optional custom prompt to use instead of the default
+            config: Dict or config class
 
         Returns:
             Generated explanation as text
@@ -142,7 +145,8 @@ class Lucerna:
             # You would replace this with your actual prompt template
             prompt = pt.prompt_company_info
         
-        return self.llm.generate_content(prompt.format(company=company))
+        return self.llm.generate_content(prompt.format(company=company),
+                                        generation_config)
 
     def get_investment_advice(self,
                               risk_profile: str,

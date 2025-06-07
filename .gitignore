@@ -2,3 +2,5 @@ tb_logs/
 venv_dist_tr/
 data/
 .env
+.ipynb_checkpoints/
+__pycache__/

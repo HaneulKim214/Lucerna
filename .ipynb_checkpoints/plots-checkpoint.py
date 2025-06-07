@@ -17,3 +17,34 @@ def create_candlestick_chart(df, name, curr):
         xaxis_rangeslider_visible=False
     )
     return fig
+
+
+def create_comparison_chart(df, title, chart_type='scatter'):
+    """
+    Create a chart that compares columns.
+    x-axis will be df.index
+
+    parameters
+    ----------
+    df: pd.DataFrame
+    """
+    charts = {"scatter":go.Scatter, "bar":go.Bar}
+    chart_options = list(charts.keys())
+    if chart_type not in chart_options:
+        raise ValueError(f"{chart_type} does not exist. Choose from {chart_options}")
+    
+    fig = go.Figure()
+    for col in df.columns:
+        fig.add_trace(
+            charts[chart_type](
+                x=df.index,
+                y=df[col],
+                name=col
+            )
+        )
+    fig.update_layout(
+        title=title,
+        xaxis_title='Date',
+        xaxis_rangeslider_visible=False
+    )
+    return fig
