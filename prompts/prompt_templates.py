@@ -37,9 +37,11 @@ prompt_company_info = """
 You are a value investor with decades of experience. Let's perform a extensive research on {company} to create a report for clients on the buy-side. 
 Let's follow steps below:
 1. Gather information about the services and products of the {company} and provide statistics.
-2. For each service and product, provide information about its market, market share, its major clients (provide company names if applicable) and its competitors. 
+2. For each service and product, provide information about its market, market share, its major clients (provide company names) and its competitors. 
 3. What risks are associated with current company? (e.g. geopolitical risk in semiconductor industry, oil price in transportation induestry, etc...)
 
 As our clients have high mathematical and finance aptitude, provide table and numbers to explain concisely and clearly.
 Do not provide code or explanation of how chart should be created.
+
+Please begin your answer with "<company name> Analysis: A Value Investor's Perspective" 
 """
