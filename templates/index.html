@@ -101,6 +101,30 @@
                                 <p>Select a stock to view information</p>
                             </div>
                         </div>
+                        <hr class="bg-secondary">
+                        <div class="text-center mb-3">
+                            <button class="btn btn-primary" id="activateLucerna">
+                                <i class="fas fa-robot me-2"></i>Activate Lucerna
+                            </button>
+                        </div>
+                        <div id="lucernaAnalysis" class="d-none">
+                            <ul class="nav nav-tabs" id="analysisTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">Overview</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="financials-tab" data-bs-toggle="tab" data-bs-target="#financials" type="button" role="tab">Financials</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="risks-tab" data-bs-toggle="tab" data-bs-target="#risks" type="button" role="tab">Risks</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content p-3" id="analysisTabContent">
+                                <div class="tab-pane fade show active" id="overview" role="tabpanel"></div>
+                                <div class="tab-pane fade" id="financials" role="tabpanel"></div>
+                                <div class="tab-pane fade" id="risks" role="tabpanel"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -233,15 +257,35 @@
                 updateStockOverview(symbol, name);
             }
         });
-
+        // In JS, `document` is a built-in object that represents the entire web page loaded in the browser.
+        // It's part of DOM (Document Object Model).
+        // It is a global object automatically available in all JavaScript code.
         function updateStockOverview(symbol, name) {
             document.getElementById('stockSymbol').textContent = symbol;
             document.getElementById('stockName').textContent = name;
             document.getElementById('stockInfo').innerHTML = '<div class="text-center py-3 text-secondary">Loading...</div>';
 
             fetch(`/api/stock-info?symbol=${encodeURIComponent(symbol)}`)
+                // Parse the response as JSON and receive parsed data as variable data.
                 .then(response => response.json())
                 .then(data => {
+                    if (data.error) {
+                        // Handle error
+                        document.getElementById('stockInfo').innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                ${data.error}
+                            </div>`;
+                        document.getElementById('candlestickChart').innerHTML = `
+                            <div class="text-center py-5 my-5 text-danger">
+                                <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                                <h4>Error Loading Chart</h4>
+                                <p>${data.error}</p>
+                            </div>`;
+                        return;
+                    }
+                    
+                    console.log('Stock data:', data);
                     // Render company info
                     document.getElementById('stockInfo').innerHTML = `
                         <div>
@@ -258,6 +302,62 @@
                     Plotly.newPlot('candlestickChart', fig.data, fig.layout, {responsive: true});
                 });
         }
+
+        // Lucerna Analysis and Chatbot functionality
+        let currentCompany = '';
+        let chatHistory = [];
+
+        document.getElementById('activateLucerna').addEventListener('click', function() {
+            const companyName = document.querySelector('#stockInfo h6').textContent;
+            if (!companyName) {
+                alert('Please select a stock first');
+                return;
+            }
+            
+            // Show loading state
+            document.getElementById('lucernaAnalysis').classList.remove('d-none');
+            document.getElementById('overview').innerHTML = '<div class="text-center"><div class="spinner-border text-light" role="status"></div></div>';
+            document.getElementById('financials').innerHTML = '<div class="text-center"><div class="spinner-border text-light" role="status"></div></div>';
+            document.getElementById('risks').innerHTML = '<div class="text-center"><div class="spinner-border text-light" role="status"></div></div>';
+
+            // Fetch Lucerna analysis
+            fetch('/api/analyze-company', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ company: companyName })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const analysis = data.analysis;
+                
+                // Update tabs with analysis
+                document.getElementById('overview').innerHTML = `
+                    <div class="analysis-section">
+                        <h6 class="mb-3">Company Overview</h6>
+                        <div class="text-light">${analysis.overview || 'No overview available'}</div>
+                    </div>`;
+                
+                document.getElementById('financials').innerHTML = `
+                    <div class="analysis-section">
+                        <h6 class="mb-3">Financial Analysis</h6>
+                        <div class="text-light">${analysis.financials || 'No financial analysis available'}</div>
+                    </div>`;
+                
+                document.getElementById('risks').innerHTML = `
+                    <div class="analysis-section">
+                        <h6 class="mb-3">Risk Assessment</h6>
+                        <div class="text-light">${analysis.risks || 'No risk analysis available'}</div>
+                    </div>`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('overview').innerHTML = '<div class="text-danger">Error loading analysis</div>';
+            });
+        });
     </script>
+
+
 </body>
 </html>

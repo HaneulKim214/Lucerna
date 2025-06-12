@@ -14,7 +14,22 @@ def create_candlestick_chart(df, name, curr):
         title=f'{name} prices in ({curr})',
         xaxis_title='Date',
         yaxis_title='Price',
-        xaxis_rangeslider_visible=False
+        xaxis_rangeslider_visible=False,
+        # Make plot responsive to container size
+        autosize=True,
+        # Dark theme colors
+        plot_bgcolor='#1E1E1E',  # Dark background
+        paper_bgcolor='#1E1E1E',  # Dark background for the whole figure
+        font=dict(color='#FFFFFF'),  # White text
+        # Style the axes
+        xaxis=dict(
+            gridcolor='#333333',
+            zerolinecolor='#333333'
+        ),
+        yaxis=dict(
+            gridcolor='#333333',
+            zerolinecolor='#333333'
+        )
     )
     return fig
 

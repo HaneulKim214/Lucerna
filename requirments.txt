@@ -150,3 +150,4 @@ widgetsnbextension==4.0.11
 wrapt==1.16.0
 yahoo-fin==0.8.9.1
 zipp==3.21.0
+PyPDF2==3.0.1

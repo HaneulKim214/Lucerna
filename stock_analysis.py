@@ -29,15 +29,14 @@ def get_stock_info(symbol):
         ,"industry": ticker.info['industry']
         ,"business_summary": ticker.info['longBusinessSummary']
         ,"currency": ticker.info['financialCurrency']
-        ,"stock_exch": ticker.info['fullExchangeName']
+        ,"exchange": ticker.info['fullExchangeName']
     }
     end_date = date.today()
     st_date = end_date - timedelta(days=183)
     stock_price_df = get_stock_price(ticker, st_date, end_date,
                                       interval='1d', timezone=False)
-    stock_info['stock_price_df'] = stock_price_df
     
-    return stock_info
+    return stock_info, stock_price_df
 
 def get_stock_price(ticker, st_date, end_date, 
                     interval='1d', timezone=False):
