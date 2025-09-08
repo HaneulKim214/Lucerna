@@ -1,5 +1,5 @@
 # Finance
-For various Finance related data science projects.
+Financial AI Agent
 
 ## 🎯 Features
 - **Company analysis**: Create summary of given company by leveraging annual reports and most up-to-date relevant information.
